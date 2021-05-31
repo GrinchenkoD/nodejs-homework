@@ -41,7 +41,7 @@ const getContactById = async (req, res, next) => {
 };
 
 const addContact = async (req, res, next) => {
-  const validData = await contactSchema.isValid(body);
+  const validData = await contactSchema.isValid(req.body);
   if (!validData) {
     return {
       message: "Data is not valid. Check it and try again ",
@@ -88,7 +88,7 @@ const removeContact = async (req, res, next) => {
 };
 
 const updateContact = async (req, res, next) => {
-  const validData = await contactSchema.isValid(body);
+  const validData = await contactSchema.isValid(req.body);
   if (!validData) {
     return {
       message: "Data is not valid. Check it and try again ",
