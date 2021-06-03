@@ -3,6 +3,9 @@ const Users = require("../model/users");
 const { HttpCode } = require("../helpers/constants");
 require("dotenv").config();
 const SECRET = process.env.SECRET;
+const fs = require("fs/promises");
+const path = require("path");
+const Jimp = require("jimp");
 
 const reg = async (req, res, next) => {
   try {
@@ -99,5 +102,35 @@ const currentUser = async (req, res, next) => {
     next(err);
   }
 };
+const updateUser = async (req, res, next) => {
+  const now = new Date();
+  const prefix = `${now.getFullYear()}-${
+    now.getMonth() + 1
+  }-${now.getDate()}-${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}`;
+  const { path: temporaryName, originalname } = req.file;
+  const { user, file } = req;
+  const avatarsDir = path.join(process.cwd(), "public", "avatars");
+  const filePathName = path.join(avatarsDir, `${prefix}_${originalname}`);
+  const img = await Jimp.read(temporaryName);
+  await img
+    .autocrop()
+    .cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE)
+    .writeAsync(temporaryName);
+  await fs.rename(temporaryName, filePathName, (err) => {
+    if (err) {
+      console.log(err);
+    }
+  });
 
-module.exports = { reg, login, logout, currentUser };
+  await Users.updateAvatar(user._id, filePathName);
+  const userWithUpdtAvatar = await Users.findById(user._id);
+  return res.status(200).json({
+    status: "ok",
+    code: HttpCode.OK,
+    user: {
+      avatarURL: userWithUpdtAvatar.avatarURL,
+    },
+  });
+};
+
+module.exports = { reg, login, logout, currentUser, updateUser };
