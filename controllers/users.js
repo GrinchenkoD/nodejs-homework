@@ -133,46 +133,4 @@ const updateUser = async (req, res, next) => {
   });
 };
 
-// const updateUser = async (req, res, next) => {
-//   try {
-//     const id = req.user.id;
-//     const avatarUrl = await saveAvatarToStatic(req);
-//     await Users.updateAvatar(id, avatarUrl);
-
-//     return res.json({
-//       status: "success",
-//       code: HttpCode.OK,
-//       data: {
-//         ...req.body,
-//         avatarUrl,
-//       },
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-// const saveAvatarToStatic = async (req) => {
-//   const id = req.user.id;
-//   const AVATARS_OF_USERS = process.env.AVATARS_OF_USERS;
-//   const pathFile = req.file.path;
-//   const avatarName = req.file.originalname;
-//   const folderForUserAvatar = id;
-//   await createFolderIsExist(path.join(AVATARS_OF_USERS, folderForUserAvatar));
-//   await fs.rename(
-//     pathFile,
-//     path.join(AVATARS_OF_USERS, folderForUserAvatar, avatarName)
-//   );
-//   const avatarURL = path.normalize(path.join(id, avatarName));
-
-//   try {
-//     await fs.unlink(
-//       path.join(process.cwd(), AVATARS_OF_USERS, req.user.avatar)
-//     );
-//   } catch (err) {
-//     console.log(err.message);
-//   }
-
-//   return avatarURL;
-// };
-
 module.exports = { reg, login, logout, currentUser, updateUser };
