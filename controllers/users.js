@@ -48,7 +48,7 @@ const repeatEmailVerify = async (req, res, next) => {
       from: "ra1d3r@i.ua",
       subject: "Verify your email",
       text: "To verify your email follow this link",
-      html: `<a>http://localhost:3000/users/verify/${user.verifyToken}</a>`,
+      html: `<a>http://localhost:3000/api/users/verify/${user.verifyToken}</a>`,
     };
     await sgMail
       .send(verifyMessage)
@@ -95,7 +95,7 @@ const reg = async (req, res, next) => {
       from: "ra1d3r@i.ua",
       subject: "Verify your email",
       text: "To verify your email follow this link",
-      html: `<a>http://localhost:3000/users/verify/${newUser.verifyToken}</a>`,
+      html: `<a>http://localhost:3000/api/users/verify/${newUser.verifyToken}</a>`,
     };
     await sgMail
       .send(verifyMessage)

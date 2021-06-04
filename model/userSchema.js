@@ -25,9 +25,6 @@ const validate = (schema, obj, next) => {
 };
 
 module.exports.createUser = (req, res, next) => {
-  console.log("<<<<<<<<<<<<<<<<<<HERE RICHED HERE>>>>>>>>>>>");
-  console.log(req.body);
-
   return validate(schemaCreateUser, req.body, next);
 };
 
