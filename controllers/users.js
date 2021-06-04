@@ -6,6 +6,77 @@ const SECRET = process.env.SECRET;
 const fs = require("fs/promises");
 const path = require("path");
 const Jimp = require("jimp");
+const sgMail = require("../helpers/sendgrid");
+
+const emailVerify = async (req, res, next) => {
+  const { verificationToken } = req.params;
+  const verifiedUsed = await Users.getUserVerify(verificationToken);
+
+  if (!verifiedUsed) {
+    res.status(404).json({
+      status: "Not Found",
+      code: 404,
+      ResponseBody: {
+        message: "User not found",
+      },
+    });
+  } else {
+    await Users.updateVerifyToken(verifiedUsed._id);
+    await Users.updateVerify(verifiedUsed._id);
+
+    res.status(200).json({
+      status: "ok",
+      code: 200,
+      ResponseBody: {
+        message: "Verification successful",
+      },
+    });
+  }
+};
+const repeatEmailVerify = async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) {
+    res.status(400).json({
+      status: "Error",
+      code: 400,
+      ResponseBody: {
+        message: "missing required field email",
+      },
+    });
+  }
+  const user = await Users.findByEmail(email);
+  if (user && !user.verify && user.verifyToken) {
+    const verifyMessage = {
+      to: email,
+      from: "ra1d3r@i.ua",
+      subject: "Verify your email",
+      text: "To verify your email follow this link",
+      html: `<a>http://localhost:3000/api/users/verify/${user.verifyToken}</a>`,
+    };
+    await sgMail
+      .send(verifyMessage)
+      .then(() => {
+        console.log("Email sent");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    res.status(200).json({
+      status: "ok",
+      ResponseBody: {
+        message: "Verification email sent",
+      },
+    });
+  }
+  if (user && user.verify) {
+    res.status(400).json({
+      status: "Bad Request",
+      ResponseBody: {
+        message: "Verification has already been passed",
+      },
+    });
+  }
+};
 
 const reg = async (req, res, next) => {
   try {
@@ -21,6 +92,22 @@ const reg = async (req, res, next) => {
       });
     }
     const newUser = await Users.create(req.body);
+
+    const verifyMessage = {
+      to: newUser.email,
+      from: "ra1d3r@i.ua",
+      subject: "Verify your email",
+      text: "To verify your email follow this link",
+      html: `<a>http://localhost:3000/api/users/verify/${newUser.verifyToken}</a>`,
+    };
+    await sgMail
+      .send(verifyMessage)
+      .then(() => {
+        console.log("Email sent");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
 
     return res.status(HttpCode.CREATED).json({
       status: "success",
@@ -39,6 +126,16 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await Users.findByEmail(email);
+
+    if (!user.verify) {
+      return res.status(400).json({
+        status: "error",
+        code: HttpCode.BAD_REQUEST,
+        message: "Your email is not verifyed yet",
+        data: "Please verify your email",
+      });
+    }
+
     const isValidPassword = await user?.validPassword(password);
 
     if (!user || !isValidPassword) {
@@ -133,4 +230,12 @@ const updateUser = async (req, res, next) => {
   });
 };
 
-module.exports = { reg, login, logout, currentUser, updateUser };
+module.exports = {
+  reg,
+  login,
+  logout,
+  currentUser,
+  updateUser,
+  emailVerify,
+  repeatEmailVerify,
+};
