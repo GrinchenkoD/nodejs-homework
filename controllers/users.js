@@ -45,7 +45,7 @@ const repeatEmailVerify = async (req, res, next) => {
   if (user && !user.verify && user.verifyToken) {
     const verifyMessage = {
       to: email,
-      from: "vurtnevk@gmail.com",
+      from: "ra1d3r@i.ua",
       subject: "Verify your email",
       text: "To verify your email follow this link",
       html: `<a>http://localhost:3000/users/verify/${user.verifyToken}</a>`,
@@ -92,7 +92,7 @@ const reg = async (req, res, next) => {
 
     const verifyMessage = {
       to: newUser.email,
-      from: "vurtnevk@gmail.com",
+      from: "ra1d3r@i.ua",
       subject: "Verify your email",
       text: "To verify your email follow this link",
       html: `<a>http://localhost:3000/users/verify/${newUser.verifyToken}</a>`,
