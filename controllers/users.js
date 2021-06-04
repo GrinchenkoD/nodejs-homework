@@ -11,24 +11,27 @@ const sgMail = require("../helpers/sendgrid");
 const emailVerify = async (req, res, next) => {
   const { verificationToken } = req.params;
   const verifiedUsed = await Users.getUserVerify(verificationToken);
-  await Users.updateVerifyToken(verifiedUsed._id);
-  await Users.updateVerify(verifiedUsed._id);
 
-  verifiedUsed
-    ? res.status(200).json({
-        status: "ok",
-        code: 200,
-        ResponseBody: {
-          message: "Verification successful",
-        },
-      })
-    : res.status(404).json({
-        status: "Not Found",
-        code: 404,
-        ResponseBody: {
-          message: "User not found",
-        },
-      });
+  if (!verifiedUsed) {
+    res.status(404).json({
+      status: "Not Found",
+      code: 404,
+      ResponseBody: {
+        message: "User not found",
+      },
+    });
+  } else {
+    await Users.updateVerifyToken(verifiedUsed._id);
+    await Users.updateVerify(verifiedUsed._id);
+
+    res.status(200).json({
+      status: "ok",
+      code: 200,
+      ResponseBody: {
+        message: "Verification successful",
+      },
+    });
+  }
 };
 const repeatEmailVerify = async (req, res, next) => {
   const { email } = req.body;
